@@ -1,43 +1,46 @@
-// src/App.js
-
 import React, { useState } from 'react';
 import axios from 'axios';
+import './App.css';
 
 function App() {
   const [city, setCity] = useState('');
-  const [weatherData, setWeatherData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [weather, setWeather] = useState(null);
+  const [error, setError] = useState('');
 
-  const fetchWeatherData = async () => {
+  const getWeather = async () => {
+    const apiKey = '97c2ab1de2d76cb84b1fda826720f7f9'; // Replace with your OpenWeatherMap API key
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+
     try {
-      setLoading(true);
-      const response = await axios.get(`/weather/${city}`);
-      console.log("Weather Data:", response.data); // Log weather data for debugging
-      setWeatherData(response.data);
-      setLoading(false);
+      const response = await axios.get(url);
+      console.log(response.data); // Log the response data for debugging
+      setWeather(response.data);
+      setError('');
     } catch (error) {
-      console.error('Error fetching weather data:', error);
-      setLoading(false);
+      console.error('Error fetching weather data', error);
+      setWeather(null);
+      setError('City not found or an error occurred');
     }
   };
 
   return (
-    <div>
-      <h1>Weather Forecast App</h1>
+    <div className="weather-app">
+      <h1>Weather Application</h1>
       <input
         type="text"
         value={city}
         onChange={(e) => setCity(e.target.value)}
         placeholder="Enter city name"
       />
-      <button onClick={fetchWeatherData} disabled={!city || loading}>
-        {loading ? 'Loading...' : 'Get Weather'}
-      </button>
-      {weatherData && (
-        <div>
-          <h2>Weather for {weatherData.name}</h2>
-          <p>Temperature: {weatherData.main.temp}°C</p>
-          <p>Weather: {weatherData.weather[0].description}</p>
+      <button onClick={getWeather}>Get Weather</button>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {weather && (
+        <div className="weather-result">
+          <h2>{weather.name}</h2>
+          <p>Temperature: {weather.main.temp}°C</p>
+          <p>Weather: {weather.weather[0].description}</p>
+          <p>Humidity: {weather.main.humidity}%</p>
+          <p>Wind Speed: {weather.wind.speed} m/s</p>
         </div>
       )}
     </div>
